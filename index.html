@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WANTED: Das Daily OP Quiz</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Permanent+Marker&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <style>
         :root {
             --parchment: #f2e1b1; --wood: #3e2723; --gold: #d4af37;
@@ -14,7 +17,12 @@
         body { 
             font-family: 'Roboto Condensed', sans-serif;
             background-color: #1a0f00;
-            background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
+            /* Hintergrundbild mit dunklem Overlay */
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), 
+                              url('https://images.alphacoders.com/132/1328221.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; overflow-x: hidden;
         }
@@ -35,11 +43,21 @@
             padding: 15px; margin: 15px 0; border-radius: 5px; text-align: left;
             font-size: 0.95rem; color: #3e2723; line-height: 1.4;
         }
-        .tutorial-box h3 { font-family: 'Permanent Marker'; margin: 0 0 10px 0; font-size: 1.1rem; color: var(--deep-red); text-align: center; }
+        /* Geänderte Überschrift hier */
+        .tutorial-box h3 { font-family: 'Permanent Marker'; margin: 0 0 10px 0; font-size: 1.2rem; color: var(--deep-red); text-align: center; }
         .flavor-text { font-style: italic; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; }
         
         .rank-info { margin-top: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.3); padding: 8px; border-radius: 4px; }
         .rank-item { display: flex; justify-content: space-between; margin-bottom: 3px; }
+
+        .dot {
+            height: 12px; width: 12px;
+            background-color: #bbb;
+            border-radius: 50%; display: inline-block;
+            margin: 0 5px; border: 1px solid #000;
+        }
+        .dot-correct { background-color: #2d5a27; }
+        .dot-wrong { background-color: #96281b; }
 
         .btn { 
             display: block; width: 100%; padding: 12px; margin: 8px 0; 
@@ -51,7 +69,8 @@
         .btn.correct { background: #2d5a27 !important; color: white !important; border-color: white !important; }
         .btn.wrong { background: #96281b !important; color: white !important; border-color: white !important; }
 
-        #score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin-bottom: 10px; }
+        #score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin: 10px 0; }
+        #timer-box { color: var(--deep-red); font-weight: bold; font-size: 1.5rem; margin-top: 10px; font-family: 'Permanent Marker'; }
 
         .screen { display: none; }
         .screen.active { display: block; }
@@ -69,28 +88,35 @@
         </h1>
 
         <div id="start-screen" class="screen active">
-            <div class="tutorial-box">
-                <h3>DAILY OP QUIZ </h3>
-                <p class="flavor-text">
-                    "Reichtum, Macht und Ruhm... der Mann, der alles besaß, war der Piratenkönig Gol D. Roger!" <br><br>
-                    Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur einer kann König der Piraten werden!
-                </p>
-                
-                <strong>Deine Werkzeuge:</strong>
-                <ul style="margin: 5px 0 15px 15px; padding: 0;">
-                    <li>🃏 <b>50/50:</b> Eliminiert zwei Lügen der Marine.</li>
-                    <li>📜 <b>ROBIN:</b> Nico Robin flüstert dir einen Tipp zu.</li>
-                </ul>
+            <div id="welcome-msg">
+                <div class="tutorial-box">
+                    <h3>DAILY OP QUIZ</h3>
+                    <p class="flavor-text">
+                        "Reichtum, Macht und Ruhm... der Mann, der alles besaß, war der Piratenkönig Gol D. Roger!" <br><br>
+                        Die Ära der Piraten hat begonnen! Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur die Weisesten werden den Thron besteigen!
+                    </p>
+                    
+                    <strong>Regeln & Werkzeuge:</strong>
+                    <ul style="margin: 5px 0 15px 15px; padding: 0;">
+                        <li>🃏 <b>50/50:</b> Eliminiert zwei Lügen der Marine.</li>
+                        <li>📜 <b>ROBIN:</b> Nico Robin flüstert dir einen Tipp zu.</li>
+                    </ul>
 
-                <strong>Die Ränge der Meere:</strong>
-                <div class="rank-info">
-                    <div class="rank-item"><span>⚓ Matrose:</span> <span>Unter 1.2 Mrd. ฿</span></div>
-                    <div class="rank-item"><span>⚔️ Samurai:</span> <span>Ab 1.2 Mrd. ฿</span></div>
-                    <div class="rank-item"><span>👑 Piratenkönig:</span> <span>3.0 Mrd. ฿</span></div>
+                    <strong>Die Ränge der Meere:</strong>
+                    <div class="rank-info">
+                        <div class="rank-item"><span>⚓ Matrose:</span> <span>Unter 1.2 Mrd. ฿</span></div>
+                        <div class="rank-item"><span>⚔️ Samurai:</span> <span>Ab 1.2 Mrd. ฿</span></div>
+                        <div class="rank-item"><span>👑 Piratenkönig:</span> <span>3.0 Mrd. ฿</span></div>
+                    </div>
                 </div>
+                <button class="btn" onclick="startGame()">DIE REISE BEGINNEN</button>
             </div>
-            
-            <button class="btn" onclick="startGame()">DIE REISE BEGINNEN</button>
+
+            <div id="lock-msg" style="display:none;">
+                <p style="font-family: 'Permanent Marker'; font-size: 1.5rem; color: var(--deep-red);">RUHEPAUSE, PIRAT!</p>
+                <p>Du hast heute bereits gekämpft. Neue Fragen erscheinen in:</p>
+                <div id="timer-box">00:00:00</div>
+            </div>
         </div>
 
         <div id="game-screen" class="screen">
@@ -98,8 +124,11 @@
                 <button id="j-5050" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="use5050()">🃏 50/50</button>
                 <button id="j-robin" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="useRobin()">📜 ROBIN</button>
             </div>
+            
+            <div id="progress-dots" style="margin-bottom: 10px;"></div>
             <div id="score-display">0 ฿</div>
             <div id="robin-hint" style="display:none; font-style: italic; color: #5d4037; margin-bottom: 10px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 5px;"></div>
+            
             <h2 id="question-text" style="font-family: 'Permanent Marker'; min-height: 60px; font-size: 1.4rem;">-</h2>
             <div id="answer-buttons"></div>
             <button id="next-btn" class="btn" style="display:none; background: var(--deep-red); color: white;" onclick="loadQuestion()">NÄCHSTE ETAPPE ➔</button>
@@ -123,16 +152,46 @@
         let jokerUsed5050 = false;
         let jokerUsedRobin = false;
 
+        window.onload = () => {
+            const today = new Date().toDateString();
+            const lastPlayed = localStorage.getItem("OP_LastPlayedDate");
+            if (lastPlayed === today) {
+                document.getElementById('welcome-msg').style.display = 'none';
+                document.getElementById('lock-msg').style.display = 'block';
+                startCountdown();
+            }
+        };
+
+        function startCountdown() {
+            setInterval(() => {
+                const now = new Date();
+                const tomorrow = new Date();
+                tomorrow.setHours(24, 0, 0, 0);
+                const diff = tomorrow - now;
+                const h = Math.floor(diff / (1000 * 60 * 60));
+                const m = Math.floor((diff / (1000 * 60)) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+                document.getElementById('timer-box').innerText = 
+                    (h < 10 ? "0"+h : h) + ":" + (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+            }, 1000);
+        }
+
         function startGame() {
-            // SICHERHEITS-CHECK: Sind die Fragen da?
             if (typeof alleFragen === 'undefined') {
-                alert("FEHLER: Die Datei 'questions.js' wurde nicht gefunden oder enthält Fehler! Überprüfe, ob sie im selben Ordner liegt.");
+                alert("Fehler: questions.js nicht gefunden!");
                 return;
             }
-
-            // Zufällige Auswahl der Fragen
-            heutigeFragen = [...alleFragen].sort(() => Math.random() - 0.5).slice(0, 5);
+            let seed = new Date().getDate() + new Date().getMonth() + new Date().getFullYear();
+            heutigeFragen = [...alleFragen].sort(() => Math.sin(seed++)).slice(0, 5);
             
+            const dotsContainer = document.getElementById('progress-dots');
+            dotsContainer.innerHTML = "";
+            for (let i = 0; i < heutigeFragen.length; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.id = 'dot-' + i;
+                dotsContainer.appendChild(dot);
+            }
             showScreen('game-screen');
             loadQuestion();
         }
@@ -146,10 +205,8 @@
             document.getElementById('question-text').innerText = q.q;
             document.getElementById('next-btn').style.display = "none";
             document.getElementById('robin-hint').style.display = "none";
-            
             const container = document.getElementById('answer-buttons');
             container.innerHTML = "";
-            
             q.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
                 btn.className = 'btn';
@@ -157,7 +214,6 @@
                 btn.onclick = () => checkAnswer(i, btn);
                 container.appendChild(btn);
             });
-            
             document.getElementById('j-5050').disabled = jokerUsed5050;
             document.getElementById('j-robin').disabled = jokerUsedRobin;
         }
@@ -165,16 +221,16 @@
         function checkAnswer(choice, btn) {
             const q = heutigeFragen[currentIdx];
             const allBtns = document.querySelectorAll('#answer-buttons .btn');
+            const currentDot = document.getElementById('dot-' + currentIdx);
             allBtns.forEach(b => b.disabled = true);
-            document.getElementById('j-5050').disabled = true;
-            document.getElementById('j-robin').disabled = true;
-
             if (choice === q.correct) {
                 btn.classList.add('correct');
+                currentDot.classList.add('dot-correct');
                 score += 600000000;
                 animateBounty(score);
             } else {
                 btn.classList.add('wrong');
+                currentDot.classList.add('dot-wrong');
                 allBtns[q.correct].classList.add('correct');
             }
             currentIdx++;
@@ -201,7 +257,6 @@
             const btns = document.querySelectorAll('#answer-buttons .btn');
             let removed = 0;
             let indices = [0,1,2,3].sort(() => Math.random() - 0.5);
-            
             for (let i of indices) {
                 if (i !== q.correct && removed < 2) {
                     btns[i].style.visibility = "hidden";
@@ -223,17 +278,16 @@
         }
 
         function finishGame() {
+            localStorage.setItem("OP_LastPlayedDate", new Date().toDateString());
             showScreen('end-screen');
             document.getElementById('final-score').innerText = score.toLocaleString() + " ฿";
             const rankDiv = document.getElementById('rank-display');
             const card = document.getElementById('main-card');
-            
-            card.classList.remove('quake-active');
-
             if(score >= 3000000000) { 
                 rankDiv.innerText = "PIRATENKÖNIG"; 
                 rankDiv.style.color = "var(--gold)";
                 card.classList.add('quake-active'); 
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#d4af37', '#8b0000', '#f2e1b1'] });
             }
             else if(score >= 1200000000) { 
                 rankDiv.innerText = "SAMURAI"; 
