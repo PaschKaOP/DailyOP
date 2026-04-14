@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WANTED: Das Daily OP Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Permanent+Marker&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #f2e1b1; --wood: #3e2723; --gold: #d4af37;
+            --deep-red: #8b0000; --haki: #4b0082;
+        }
+
+        body { 
+            font-family: 'Roboto Condensed', sans-serif;
+            background-color: #1a0f00;
+            background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; overflow-x: hidden;
+        }
+
+        .game-card { 
+            background: var(--parchment); padding: 30px; border-radius: 2px; 
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9), inset 0 0 100px rgba(0,0,0,0.2); 
+            text-align: center; width: 90%; max-width: 480px; border: 12px solid #d2b48c;
+            position: relative; transition: all 0.3s ease; transform: rotate(-0.5deg);
+        }
+
+        h1 { font-family: 'Pirata One', cursive; margin: 0 0 15px 0; line-height: 0.85; padding-bottom: 10px; border-bottom: 4px solid #2c1e11; }
+        .title-main { font-size: 4.5rem; display: block; }
+        .title-sub { font-size: 1.3rem; display: block; color: #2c1e11; letter-spacing: 5px; }
+
+        .tutorial-box {
+            background: rgba(0,0,0,0.07); border: 2px dashed #a88;
+            padding: 15px; margin: 15px 0; border-radius: 5px; text-align: left;
+            font-size: 0.95rem; color: #3e2723; line-height: 1.4;
+        }
+        .tutorial-box h3 { font-family: 'Permanent Marker'; margin: 0 0 10px 0; font-size: 1.1rem; color: var(--deep-red); text-align: center; }
+        .flavor-text { font-style: italic; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; }
+        
+        .rank-info { margin-top: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.3); padding: 8px; border-radius: 4px; }
+        .rank-item { display: flex; justify-content: space-between; margin-bottom: 3px; }
+
+        .btn { 
+            display: block; width: 100%; padding: 12px; margin: 8px 0; 
+            border: 3px solid var(--gold); background: var(--wood); color: var(--gold);
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 5px 0 #000; transition: all 0.1s;
+        }
+        .btn:disabled { opacity: 0.5; cursor: default; }
+        .btn.correct { background: #2d5a27 !important; color: white !important; border-color: white !important; }
+        .btn.wrong { background: #96281b !important; color: white !important; border-color: white !important; }
+
+        #score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin-bottom: 10px; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        @keyframes quake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(0, 0); } }
+        .quake-active { animation: quake 0.1s infinite !important; }
+    </style>
+</head>
+<body>
+
+    <div class="game-card" id="main-card">
+        <h1>
+            <span class="title-main">WANTED</span>
+            <span class="title-sub">DEAD OR ALIVE</span>
+        </h1>
+
+        <div id="start-screen" class="screen active">
+            <div class="tutorial-box">
+                <h3>DAILY OP QUIZ </h3>
+                <p class="flavor-text">
+                    "Reichtum, Macht und Ruhm... der Mann, der alles besaß, war der Piratenkönig Gol D. Roger!" <br><br>
+                    Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur einer kann König der Piraten werden!
+                </p>
+                
+                <strong>Deine Werkzeuge:</strong>
+                <ul style="margin: 5px 0 15px 15px; padding: 0;">
+                    <li>🃏 <b>50/50:</b> Eliminiert zwei Lügen der Marine.</li>
+                    <li>📜 <b>ROBIN:</b> Nico Robin flüstert dir einen Tipp zu.</li>
+                </ul>
+
+                <strong>Die Ränge der Meere:</strong>
+                <div class="rank-info">
+                    <div class="rank-item"><span>⚓ Matrose:</span> <span>Unter 1.2 Mrd. ฿</span></div>
+                    <div class="rank-item"><span>⚔️ Samurai:</span> <span>Ab 1.2 Mrd. ฿</span></div>
+                    <div class="rank-item"><span>👑 Piratenkönig:</span> <span>3.0 Mrd. ฿</span></div>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="startGame()">DIE REISE BEGINNEN</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <button id="j-5050" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="use5050()">🃏 50/50</button>
+                <button id="j-robin" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="useRobin()">📜 ROBIN</button>
+            </div>
+            <div id="score-display">0 ฿</div>
+            <div id="robin-hint" style="display:none; font-style: italic; color: #5d4037; margin-bottom: 10px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 5px;"></div>
+            <h2 id="question-text" style="font-family: 'Permanent Marker'; min-height: 60px; font-size: 1.4rem;">-</h2>
+            <div id="answer-buttons"></div>
+            <button id="next-btn" class="btn" style="display:none; background: var(--deep-red); color: white;" onclick="loadQuestion()">NÄCHSTE ETAPPE ➔</button>
+        </div>
+
+        <div id="end-screen" class="screen">
+            <h2 style="font-family: 'Permanent Marker'">DEIN KOPFGELD</h2>
+            <div id="final-score" style="font-family: 'Permanent Marker'; font-size: 2.5rem; color: #8b0000;">0 ฿</div>
+            <div id="rank-display" style="font-family: 'Pirata One'; font-size: 3rem; margin-bottom: 15px;"></div>
+            <button class="btn" onclick="shareStats()" style="background: #25D366; color: white; border-color: white;">STECKBRIEF TEILEN 📱</button>
+            <button class="btn" onclick="location.reload()">NEUE REISE STARTEN</button>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+
+    <script>
+        let heutigeFragen = [];
+        let currentIdx = 0;
+        let score = 0;
+        let jokerUsed5050 = false;
+        let jokerUsedRobin = false;
+
+        function startGame() {
+            // SICHERHEITS-CHECK: Sind die Fragen da?
+            if (typeof alleFragen === 'undefined') {
+                alert("FEHLER: Die Datei 'questions.js' wurde nicht gefunden oder enthält Fehler! Überprüfe, ob sie im selben Ordner liegt.");
+                return;
+            }
+
+            // Zufällige Auswahl der Fragen
+            heutigeFragen = [...alleFragen].sort(() => Math.random() - 0.5).slice(0, 5);
+            
+            showScreen('game-screen');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIdx >= heutigeFragen.length) {
+                finishGame();
+                return;
+            }
+            const q = heutigeFragen[currentIdx];
+            document.getElementById('question-text').innerText = q.q;
+            document.getElementById('next-btn').style.display = "none";
+            document.getElementById('robin-hint').style.display = "none";
+            
+            const container = document.getElementById('answer-buttons');
+            container.innerHTML = "";
+            
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(i, btn);
+                container.appendChild(btn);
+            });
+            
+            document.getElementById('j-5050').disabled = jokerUsed5050;
+            document.getElementById('j-robin').disabled = jokerUsedRobin;
+        }
+
+        function checkAnswer(choice, btn) {
+            const q = heutigeFragen[currentIdx];
+            const allBtns = document.querySelectorAll('#answer-buttons .btn');
+            allBtns.forEach(b => b.disabled = true);
+            document.getElementById('j-5050').disabled = true;
+            document.getElementById('j-robin').disabled = true;
+
+            if (choice === q.correct) {
+                btn.classList.add('correct');
+                score += 600000000;
+                animateBounty(score);
+            } else {
+                btn.classList.add('wrong');
+                allBtns[q.correct].classList.add('correct');
+            }
+            currentIdx++;
+            document.getElementById('next-btn').style.display = "block";
+        }
+
+        function animateBounty(target) {
+            let current = Math.max(0, score - 600000000);
+            const display = document.getElementById('score-display');
+            const timer = setInterval(() => {
+                current += 20000000;
+                if (current >= target) {
+                    display.innerText = target.toLocaleString() + " ฿";
+                    clearInterval(timer);
+                } else {
+                    display.innerText = current.toLocaleString() + " ฿";
+                }
+            }, 30);
+        }
+
+        function use5050() {
+            if(jokerUsed5050) return;
+            const q = heutigeFragen[currentIdx];
+            const btns = document.querySelectorAll('#answer-buttons .btn');
+            let removed = 0;
+            let indices = [0,1,2,3].sort(() => Math.random() - 0.5);
+            
+            for (let i of indices) {
+                if (i !== q.correct && removed < 2) {
+                    btns[i].style.visibility = "hidden";
+                    removed++;
+                }
+            }
+            jokerUsed5050 = true;
+            document.getElementById('j-5050').disabled = true;
+        }
+
+        function useRobin() {
+            if(jokerUsedRobin) return;
+            const q = heutigeFragen[currentIdx];
+            const hint = document.getElementById('robin-hint');
+            hint.innerText = "Robin flüstert: " + q.tip;
+            hint.style.display = "block";
+            jokerUsedRobin = true;
+            document.getElementById('j-robin').disabled = true;
+        }
+
+        function finishGame() {
+            showScreen('end-screen');
+            document.getElementById('final-score').innerText = score.toLocaleString() + " ฿";
+            const rankDiv = document.getElementById('rank-display');
+            const card = document.getElementById('main-card');
+            
+            card.classList.remove('quake-active');
+
+            if(score >= 3000000000) { 
+                rankDiv.innerText = "PIRATENKÖNIG"; 
+                rankDiv.style.color = "var(--gold)";
+                card.classList.add('quake-active'); 
+            }
+            else if(score >= 1200000000) { 
+                rankDiv.innerText = "SAMURAI"; 
+                rankDiv.style.color = "#5d4037";
+            }
+            else { 
+                rankDiv.innerText = "MATROSE"; 
+                rankDiv.style.color = "gray";
+            }
+        }
+
+        function shareStats() {
+            const text = `🏴‍☠️ Mein Kopfgeld im Daily OP Quiz ist auf ${score.toLocaleString()} ฿ gestiegen! Kannst du mich schlagen?`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>
