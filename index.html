@@ -16,8 +16,8 @@
 
         body { 
             font-family: 'Roboto Condensed', sans-serif;
-            /* DER BRAUNE LEDER-LOOK */
             background-color: #1a0f00;
+            /* BRAUNER LEDER-LOOK */
             background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; overflow-x: hidden;
@@ -34,6 +34,7 @@
         .title-main { font-size: 4.5rem; display: block; }
         .title-sub { font-size: 1.3rem; display: block; color: #2c1e11; letter-spacing: 5px; }
 
+        /* TUTORIAL BOX */
         .tutorial-box {
             background: rgba(0,0,0,0.07); border: 2px dashed #a88;
             padding: 15px; margin: 15px 0; border-radius: 5px; text-align: left;
@@ -45,15 +46,7 @@
         .rank-info { margin-top: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.3); padding: 8px; border-radius: 4px; }
         .rank-item { display: flex; justify-content: space-between; margin-bottom: 3px; }
 
-        /* Fortschritts-Punkte */
-        .dot {
-            height: 12px; width: 12px;
-            background-color: #bbb;
-            border-radius: 50%; display: inline-block;
-            margin: 0 5px; border: 1px solid #000;
-        }
-        .dot-correct { background-color: #2d5a27; }
-        .dot-wrong { background-color: #96281b; }
+        .streak-badge { font-family: 'Permanent Marker'; color: #e67e22; font-size: 1.2rem; margin-bottom: 10px; }
 
         .btn { 
             display: block; width: 100%; padding: 12px; margin: 8px 0; 
@@ -65,8 +58,12 @@
         .btn.correct { background: #2d5a27 !important; color: white !important; border-color: white !important; }
         .btn.wrong { background: #96281b !important; color: white !important; border-color: white !important; }
 
-        #score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin: 10px 0; }
+        #score-display, #last-score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin: 5px 0; }
         #timer-box { color: var(--deep-red); font-weight: bold; font-size: 1.5rem; margin-top: 10px; font-family: 'Permanent Marker'; }
+
+        .dot { height: 12px; width: 12px; background-color: #bbb; border-radius: 50%; display: inline-block; margin: 0 5px; border: 1px solid #000; }
+        .dot-correct { background-color: #2d5a27; }
+        .dot-wrong { background-color: #96281b; }
 
         .screen { display: none; }
         .screen.active { display: block; }
@@ -85,20 +82,22 @@
 
         <div id="start-screen" class="screen active">
             <div id="welcome-msg">
+                <div id="start-streak-display" class="streak-badge" style="display:none;">Serie: 0 Tage 🔥</div>
+                
                 <div class="tutorial-box">
                     <h3>DAILY OP QUIZ</h3>
                     <p class="flavor-text">
                         "Reichtum, Macht und Ruhm... der Mann, der alles besaß, war der Piratenkönig Gol D. Roger!" <br><br>
-                        Die Ära der Piraten hat begonnen! Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur die Weisesten werden den Thron besteigen!
+                        Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur die Weisesten werden den Thron besteigen!
                     </p>
                     
-                    <strong>Regeln & Werkzeuge:</strong>
-                    <ul style="margin: 5px 0 15px 15px; padding: 0;">
+                    <strong>Werkzeuge:</strong>
+                    <ul style="margin: 5px 0 10px 15px; padding: 0;">
                         <li>🃏 <b>50/50:</b> Eliminiert zwei Lügen der Marine.</li>
                         <li>📜 <b>ROBIN:</b> Nico Robin flüstert dir einen Tipp zu.</li>
                     </ul>
 
-                    <strong>Die Ränge der Meere:</strong>
+                    <strong>Ränge:</strong>
                     <div class="rank-info">
                         <div class="rank-item"><span>⚓ Matrose:</span> <span>Unter 1.2 Mrd. ฿</span></div>
                         <div class="rank-item"><span>⚔️ Samurai:</span> <span>Ab 1.2 Mrd. ฿</span></div>
@@ -109,8 +108,11 @@
             </div>
 
             <div id="lock-msg" style="display:none;">
+                <div id="lock-streak-display" class="streak-badge">Serie: 0 Tage 🔥</div>
                 <p style="font-family: 'Permanent Marker'; font-size: 1.5rem; color: var(--deep-red);">RUHEPAUSE, PIRAT!</p>
-                <p>Du hast heute bereits gekämpft. Neue Fragen erscheinen in:</p>
+                <p>Dein heutiges Kopfgeld:</p>
+                <div id="last-score-display">0 ฿</div>
+                <p>Neue Fragen erscheinen in:</p>
                 <div id="timer-box">00:00:00</div>
             </div>
         </div>
@@ -120,22 +122,20 @@
                 <button id="j-5050" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="use5050()">🃏 50/50</button>
                 <button id="j-robin" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="useRobin()">📜 ROBIN</button>
             </div>
-            
             <div id="progress-dots" style="margin-bottom: 10px;"></div>
             <div id="score-display">0 ฿</div>
             <div id="robin-hint" style="display:none; font-style: italic; color: #5d4037; margin-bottom: 10px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 5px;"></div>
-            
             <h2 id="question-text" style="font-family: 'Permanent Marker'; min-height: 60px; font-size: 1.4rem;">-</h2>
             <div id="answer-buttons"></div>
-            <button id="next-btn" class="btn" style="display:none; background: var(--deep-red); color: white;" onclick="loadQuestion()">NÄCHSTE ETAPPE ➔</button>
+            <button id="next-btn" class="btn" style="display:none; background: var(--deep-red); color: white;" onclick="loadQuestion()">WEITER ➔</button>
         </div>
 
         <div id="end-screen" class="screen">
-            <h2 style="font-family: 'Permanent Marker'">DEIN KOPFGELD</h2>
+            <h2 style="font-family: 'Permanent Marker'">ERGEBNIS</h2>
             <div id="final-score" style="font-family: 'Permanent Marker'; font-size: 2.5rem; color: #8b0000;">0 ฿</div>
             <div id="rank-display" style="font-family: 'Pirata One'; font-size: 3rem; margin-bottom: 15px;"></div>
-            <button class="btn" onclick="shareStats()" style="background: #25D366; color: white; border-color: white;">STECKBRIEF TEILEN 📱</button>
-            <button class="btn" onclick="location.reload()">NEUE REISE STARTEN</button>
+            <div id="end-streak-display" class="streak-badge">Serie: 1 Tag 🔥</div>
+            <button class="btn" onclick="shareStats()" style="background: #25D366; color: white; border-color: white;">ERGEBNIS TEILEN 📱</button>
         </div>
     </div>
 
@@ -150,13 +150,27 @@
 
         window.onload = () => {
             const today = new Date().toDateString();
-            const lastPlayed = localStorage.getItem("OP_LastPlayedDate");
-            if (lastPlayed === today) {
+            const lastPlayedDate = localStorage.getItem("OP_LastPlayedDate");
+            const lastScore = localStorage.getItem("OP_LastScore");
+            const streak = parseInt(localStorage.getItem("OP_Streak")) || 0;
+
+            updateStreakDisplay(streak);
+
+            if (lastPlayedDate === today) {
                 document.getElementById('welcome-msg').style.display = 'none';
                 document.getElementById('lock-msg').style.display = 'block';
+                if(lastScore) document.getElementById('last-score-display').innerText = lastScore;
                 startCountdown();
             }
         };
+
+        function updateStreakDisplay(s) {
+            const text = `Serie: ${s} Tag${s !== 1 ? 'e' : '' } 🔥`;
+            document.getElementById('start-streak-display').innerText = text;
+            document.getElementById('lock-streak-display').innerText = text;
+            document.getElementById('end-streak-display').innerText = text;
+            if(s > 0) document.getElementById('start-streak-display').style.display = 'block';
+        }
 
         function startCountdown() {
             setInterval(() => {
@@ -173,10 +187,7 @@
         }
 
         function startGame() {
-            if (typeof alleFragen === 'undefined') {
-                alert("Fehler: questions.js nicht gefunden!");
-                return;
-            }
+            if (typeof alleFragen === 'undefined') { alert("Fehler: questions.js nicht gefunden!"); return; }
             let seed = new Date().getDate() + new Date().getMonth() + new Date().getFullYear();
             heutigeFragen = [...alleFragen].sort(() => Math.sin(seed++)).slice(0, 5);
             
@@ -184,8 +195,7 @@
             dotsContainer.innerHTML = "";
             for (let i = 0; i < heutigeFragen.length; i++) {
                 const dot = document.createElement('span');
-                dot.className = 'dot';
-                dot.id = 'dot-' + i;
+                dot.className = 'dot'; dot.id = 'dot-' + i;
                 dotsContainer.appendChild(dot);
             }
             showScreen('game-screen');
@@ -193,10 +203,7 @@
         }
 
         function loadQuestion() {
-            if (currentIdx >= heutigeFragen.length) {
-                finishGame();
-                return;
-            }
+            if (currentIdx >= heutigeFragen.length) { finishGame(); return; }
             const q = heutigeFragen[currentIdx];
             document.getElementById('question-text').innerText = q.q;
             document.getElementById('next-btn').style.display = "none";
@@ -205,8 +212,7 @@
             container.innerHTML = "";
             q.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = 'btn';
-                btn.innerText = opt;
+                btn.className = 'btn'; btn.innerText = opt;
                 btn.onclick = () => checkAnswer(i, btn);
                 container.appendChild(btn);
             });
@@ -247,34 +253,27 @@
             }, 30);
         }
 
-        function use5050() {
-            if(jokerUsed5050) return;
-            const q = heutigeFragen[currentIdx];
-            const btns = document.querySelectorAll('#answer-buttons .btn');
-            let removed = 0;
-            let indices = [0,1,2,3].sort(() => Math.random() - 0.5);
-            for (let i of indices) {
-                if (i !== q.correct && removed < 2) {
-                    btns[i].style.visibility = "hidden";
-                    removed++;
-                }
-            }
-            jokerUsed5050 = true;
-            document.getElementById('j-5050').disabled = true;
-        }
-
-        function useRobin() {
-            if(jokerUsedRobin) return;
-            const q = heutigeFragen[currentIdx];
-            const hint = document.getElementById('robin-hint');
-            hint.innerText = "Robin flüstert: " + q.tip;
-            hint.style.display = "block";
-            jokerUsedRobin = true;
-            document.getElementById('j-robin').disabled = true;
-        }
-
         function finishGame() {
-            localStorage.setItem("OP_LastPlayedDate", new Date().toDateString());
+            const today = new Date();
+            const todayStr = today.toDateString();
+            const lastPlayedDateStr = localStorage.getItem("OP_LastPlayedDate");
+            let streak = parseInt(localStorage.getItem("OP_Streak")) || 0;
+
+            if (lastPlayedDateStr) {
+                const lastDate = new Date(lastPlayedDateStr);
+                const diffTime = Math.abs(today - lastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays === 1) streak++; 
+                else if (diffDays > 1) streak = 1;
+            } else {
+                streak = 1;
+            }
+
+            localStorage.setItem("OP_LastPlayedDate", todayStr);
+            localStorage.setItem("OP_LastScore", score.toLocaleString() + " ฿");
+            localStorage.setItem("OP_Streak", streak);
+            updateStreakDisplay(streak);
+
             showScreen('end-screen');
             document.getElementById('final-score').innerText = score.toLocaleString() + " ฿";
             const rankDiv = document.getElementById('rank-display');
@@ -284,48 +283,38 @@
                 rankDiv.innerText = "👑 PIRATENKÖNIG"; 
                 rankDiv.style.color = "var(--gold)";
                 card.classList.add('quake-active'); 
-                
-                // --- GOLDMÜNZEN EFFEKT ---
-                const duration = 3 * 1000;
-                const end = Date.now() + duration;
-
+                const duration = 3 * 1000; const end = Date.now() + duration;
                 (function frame() {
-                    confetti({
-                        particleCount: 7,
-                        angle: 60,
-                        spread: 55,
-                        origin: { x: 0 },
-                        colors: ['#FFD700', '#DAA520', '#B8860B'],
-                        shapes: ['circle'],
-                        scalar: 1.2
-                    });
-                    confetti({
-                        particleCount: 7,
-                        angle: 120,
-                        spread: 55,
-                        origin: { x: 1 },
-                        colors: ['#FFD700', '#DAA520', '#B8860B'],
-                        shapes: ['circle'],
-                        scalar: 1.2
-                    });
-                    if (Date.now() < end) {
-                        requestAnimationFrame(frame);
-                    }
+                    confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#FFD700', '#DAA520', '#B8860B'], shapes: ['circle'], scalar: 1.2 });
+                    confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#FFD700', '#DAA520', '#B8860B'], shapes: ['circle'], scalar: 1.2 });
+                    if (Date.now() < end) requestAnimationFrame(frame);
                 }());
             }
-            else if(score >= 1200000000) { 
-                rankDiv.innerText = "⚔️ SAMURAI"; 
-                rankDiv.style.color = "#5d4037";
-            }
-            else { 
-                rankDiv.innerText = "⚓ MATROSE"; 
-                rankDiv.style.color = "gray";
-            }
+            else if(score >= 1200000000) { rankDiv.innerText = "⚔️ SAMURAI"; rankDiv.style.color = "#5d4037"; }
+            else { rankDiv.innerText = "⚓ MATROSE"; rankDiv.style.color = "gray"; }
         }
 
         function shareStats() {
-            const text = `🏴‍☠️ Mein Kopfgeld im Daily OP Quiz ist auf ${score.toLocaleString()} ฿ gestiegen! Kannst du mich schlagen?`;
+            const finalScore = document.getElementById('final-score').innerText;
+            const streak = localStorage.getItem("OP_Streak") || 1;
+            const text = `🏴‍☠️ WANTED! Mein Kopfgeld im Daily OP Quiz ist auf ${finalScore} gestiegen! \n🔥 Serie: ${streak} Tage! \n\nSpiel hier mit: https://paschkaop.github.io/DailyOP/`;
             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function use5050() {
+            if(jokerUsed5050) return;
+            const q = heutigeFragen[currentIdx];
+            const btns = document.querySelectorAll('#answer-buttons .btn');
+            let removed = 0; let indices = [0,1,2,3].sort(() => Math.random() - 0.5);
+            for (let i of indices) { if (i !== q.correct && removed < 2) { btns[i].style.visibility = "hidden"; removed++; } }
+            jokerUsed5050 = true; document.getElementById('j-5050').disabled = true;
+        }
+
+        function useRobin() {
+            if(jokerUsedRobin) return;
+            const hint = document.getElementById('robin-hint');
+            hint.innerText = "Robin flüstert: " + heutigeFragen[currentIdx].tip; hint.style.display = "block";
+            jokerUsedRobin = true; document.getElementById('j-robin').disabled = true;
         }
 
         function showScreen(id) {
