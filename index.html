@@ -17,7 +17,6 @@
         body { 
             font-family: 'Roboto Condensed', sans-serif;
             background-color: #1a0f00;
-            /* BRAUNER LEDER-LOOK */
             background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; overflow-x: hidden;
@@ -34,7 +33,6 @@
         .title-main { font-size: 4.5rem; display: block; }
         .title-sub { font-size: 1.3rem; display: block; color: #2c1e11; letter-spacing: 5px; }
 
-        /* TUTORIAL BOX */
         .tutorial-box {
             background: rgba(0,0,0,0.07); border: 2px dashed #a88;
             padding: 15px; margin: 15px 0; border-radius: 5px; text-align: left;
@@ -48,6 +46,12 @@
 
         .streak-badge { font-family: 'Permanent Marker'; color: #e67e22; font-size: 1.2rem; margin-bottom: 10px; }
 
+        #question-image-container {
+            width: 100%; max-height: 180px; margin-bottom: 15px; display: none;
+            justify-content: center; overflow: hidden; border-radius: 5px; border: 2px solid var(--wood);
+        }
+        #question-image { width: 100%; height: 100%; object-fit: cover; }
+
         .btn { 
             display: block; width: 100%; padding: 12px; margin: 8px 0; 
             border: 3px solid var(--gold); background: var(--wood); color: var(--gold);
@@ -58,7 +62,7 @@
         .btn.correct { background: #2d5a27 !important; color: white !important; border-color: white !important; }
         .btn.wrong { background: #96281b !important; color: white !important; border-color: white !important; }
 
-        #score-display, #last-score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin: 5px 0; }
+        #score-display, #last-score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin: 10px 0; }
         #timer-box { color: var(--deep-red); font-weight: bold; font-size: 1.5rem; margin-top: 10px; font-family: 'Permanent Marker'; }
 
         .dot { height: 12px; width: 12px; background-color: #bbb; border-radius: 50%; display: inline-block; margin: 0 5px; border: 1px solid #000; }
@@ -88,16 +92,16 @@
                     <h3>DAILY OP QUIZ</h3>
                     <p class="flavor-text">
                         "Reichtum, Macht und Ruhm... der Mann, der alles besaß, war der Piratenkönig Gol D. Roger!" <br><br>
-                        Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur die Weisesten werden den Thron besteigen!
+                        Die Ära der Piraten hat begonnen! Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur die Weisesten werden den Thron besteigen!
                     </p>
                     
-                    <strong>Werkzeuge:</strong>
+                    <strong>Deine Werkzeuge:</strong>
                     <ul style="margin: 5px 0 10px 15px; padding: 0;">
                         <li>🃏 <b>50/50:</b> Eliminiert zwei Lügen der Marine.</li>
                         <li>📜 <b>ROBIN:</b> Nico Robin flüstert dir einen Tipp zu.</li>
                     </ul>
 
-                    <strong>Ränge:</strong>
+                    <strong>Die Ränge der Meere:</strong>
                     <div class="rank-info">
                         <div class="rank-item"><span>⚓ Matrose:</span> <span>Unter 1.2 Mrd. ฿</span></div>
                         <div class="rank-item"><span>⚔️ Samurai:</span> <span>Ab 1.2 Mrd. ฿</span></div>
@@ -122,9 +126,12 @@
                 <button id="j-5050" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="use5050()">🃏 50/50</button>
                 <button id="j-robin" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="useRobin()">📜 ROBIN</button>
             </div>
+            
             <div id="progress-dots" style="margin-bottom: 10px;"></div>
+            <div id="question-image-container"><img id="question-image" src="" alt="Quest"></div>
             <div id="score-display">0 ฿</div>
             <div id="robin-hint" style="display:none; font-style: italic; color: #5d4037; margin-bottom: 10px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 5px;"></div>
+            
             <h2 id="question-text" style="font-family: 'Permanent Marker'; min-height: 60px; font-size: 1.4rem;">-</h2>
             <div id="answer-buttons"></div>
             <button id="next-btn" class="btn" style="display:none; background: var(--deep-red); color: white;" onclick="loadQuestion()">WEITER ➔</button>
@@ -142,6 +149,12 @@
     <script src="questions.js"></script>
 
     <script>
+        // SOUNDS INITIALISIEREN
+        const soundCorrect = new Audio('correct.mp3');
+        const soundWrong = new Audio('wrong.mp3');
+        const soundCoins = new Audio('coins.mp3');
+        const soundJoker = new Audio('joker.mp3');
+
         let heutigeFragen = [];
         let currentIdx = 0;
         let score = 0;
@@ -205,6 +218,12 @@
         function loadQuestion() {
             if (currentIdx >= heutigeFragen.length) { finishGame(); return; }
             const q = heutigeFragen[currentIdx];
+            const imgContainer = document.getElementById('question-image-container');
+            const imgElement = document.getElementById('question-image');
+            
+            if (q.img) { imgElement.src = q.img; imgContainer.style.display = "flex"; } 
+            else { imgContainer.style.display = "none"; }
+
             document.getElementById('question-text').innerText = q.q;
             document.getElementById('next-btn').style.display = "none";
             document.getElementById('robin-hint').style.display = "none";
@@ -226,11 +245,13 @@
             const currentDot = document.getElementById('dot-' + currentIdx);
             allBtns.forEach(b => b.disabled = true);
             if (choice === q.correct) {
+                soundCorrect.play().catch(()=>{}); 
                 btn.classList.add('correct');
                 currentDot.classList.add('dot-correct');
                 score += 600000000;
                 animateBounty(score);
             } else {
+                soundWrong.play().catch(()=>{}); 
                 btn.classList.add('wrong');
                 currentDot.classList.add('dot-wrong');
                 allBtns[q.correct].classList.add('correct');
@@ -240,6 +261,7 @@
         }
 
         function animateBounty(target) {
+            soundCoins.play().catch(()=>{}); 
             let current = Math.max(0, score - 600000000);
             const display = document.getElementById('score-display');
             const timer = setInterval(() => {
@@ -283,10 +305,10 @@
                 rankDiv.innerText = "👑 PIRATENKÖNIG"; 
                 rankDiv.style.color = "var(--gold)";
                 card.classList.add('quake-active'); 
-                const duration = 3 * 1000; const end = Date.now() + duration;
+                const duration = 3000; const end = Date.now() + duration;
                 (function frame() {
-                    confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#FFD700', '#DAA520', '#B8860B'], shapes: ['circle'], scalar: 1.2 });
-                    confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#FFD700', '#DAA520', '#B8860B'], shapes: ['circle'], scalar: 1.2 });
+                    confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#FFD700', '#DAA520'], shapes: ['circle'], scalar: 1.2 });
+                    confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#FFD700', '#DAA520'], shapes: ['circle'], scalar: 1.2 });
                     if (Date.now() < end) requestAnimationFrame(frame);
                 }());
             }
@@ -297,12 +319,13 @@
         function shareStats() {
             const finalScore = document.getElementById('final-score').innerText;
             const streak = localStorage.getItem("OP_Streak") || 1;
-            const text = `🏴‍☠️ WANTED! Mein Kopfgeld im Daily OP Quiz ist auf ${finalScore} gestiegen! \n🔥 Serie: ${streak} Tage! \n\nSpiel hier mit: https://paschkaop.github.io/DailyOP/`;
+            const text = `🏴‍☠️ WANTED! Mein Kopfgeld: ${finalScore}\n🔥 Serie: ${streak} Tage!\n\nSpiel hier mit: https://paschkaop.github.io/DailyOP/`;
             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function use5050() {
             if(jokerUsed5050) return;
+            soundJoker.play().catch(()=>{}); 
             const q = heutigeFragen[currentIdx];
             const btns = document.querySelectorAll('#answer-buttons .btn');
             let removed = 0; let indices = [0,1,2,3].sort(() => Math.random() - 0.5);
@@ -312,6 +335,7 @@
 
         function useRobin() {
             if(jokerUsedRobin) return;
+            soundJoker.play().catch(()=>{}); 
             const hint = document.getElementById('robin-hint');
             hint.innerText = "Robin flüstert: " + heutigeFragen[currentIdx].tip; hint.style.display = "block";
             jokerUsedRobin = true; document.getElementById('j-robin').disabled = true;
