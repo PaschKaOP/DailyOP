@@ -16,6 +16,7 @@
 
         body { 
             font-family: 'Roboto Condensed', sans-serif;
+            /* DER BRAUNE LEDER-LOOK */
             background-color: #1a0f00;
             background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
             display: flex; justify-content: center; align-items: center;
@@ -38,13 +39,13 @@
             padding: 15px; margin: 15px 0; border-radius: 5px; text-align: left;
             font-size: 0.95rem; color: #3e2723; line-height: 1.4;
         }
-        /* Geänderte Überschrift hier */
         .tutorial-box h3 { font-family: 'Permanent Marker'; margin: 0 0 10px 0; font-size: 1.2rem; color: var(--deep-red); text-align: center; }
         .flavor-text { font-style: italic; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; }
         
         .rank-info { margin-top: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.3); padding: 8px; border-radius: 4px; }
         .rank-item { display: flex; justify-content: space-between; margin-bottom: 3px; }
 
+        /* Fortschritts-Punkte */
         .dot {
             height: 12px; width: 12px;
             background-color: #bbb;
@@ -278,18 +279,46 @@
             document.getElementById('final-score').innerText = score.toLocaleString() + " ฿";
             const rankDiv = document.getElementById('rank-display');
             const card = document.getElementById('main-card');
+
             if(score >= 3000000000) { 
-                rankDiv.innerText = "PIRATENKÖNIG"; 
+                rankDiv.innerText = "👑 PIRATENKÖNIG"; 
                 rankDiv.style.color = "var(--gold)";
                 card.classList.add('quake-active'); 
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#d4af37', '#8b0000', '#f2e1b1'] });
+                
+                // --- GOLDMÜNZEN EFFEKT ---
+                const duration = 3 * 1000;
+                const end = Date.now() + duration;
+
+                (function frame() {
+                    confetti({
+                        particleCount: 7,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        colors: ['#FFD700', '#DAA520', '#B8860B'],
+                        shapes: ['circle'],
+                        scalar: 1.2
+                    });
+                    confetti({
+                        particleCount: 7,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        colors: ['#FFD700', '#DAA520', '#B8860B'],
+                        shapes: ['circle'],
+                        scalar: 1.2
+                    });
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                }());
             }
             else if(score >= 1200000000) { 
-                rankDiv.innerText = "SAMURAI"; 
+                rankDiv.innerText = "⚔️ SAMURAI"; 
                 rankDiv.style.color = "#5d4037";
             }
             else { 
-                rankDiv.innerText = "MATROSE"; 
+                rankDiv.innerText = "⚓ MATROSE"; 
                 rankDiv.style.color = "gray";
             }
         }
