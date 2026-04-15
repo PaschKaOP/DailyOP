@@ -45,6 +45,8 @@
         .rank-item { display: flex; justify-content: space-between; margin-bottom: 3px; }
 
         .streak-badge { font-family: 'Permanent Marker'; color: #e67e22; font-size: 1.2rem; margin-bottom: 10px; }
+        
+        #category-badge { font-family: 'Permanent Marker'; color: var(--haki); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
 
         #question-image-container {
             width: 100%; max-height: 180px; margin-bottom: 15px; display: none;
@@ -62,8 +64,9 @@
         .btn.correct { background: #2d5a27 !important; color: white !important; border-color: white !important; }
         .btn.wrong { background: #96281b !important; color: white !important; border-color: white !important; }
 
-        #score-display, #last-score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin: 10px 0; }
+        #score-display, #last-score-display { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: var(--deep-red); margin: 5px 0; }
         #timer-box { color: var(--deep-red); font-weight: bold; font-size: 1.5rem; margin-top: 10px; font-family: 'Permanent Marker'; }
+        #source-link { color: #5d4037; font-size: 0.85rem; text-decoration: underline; display: block; margin-bottom: 10px; }
 
         .dot { height: 12px; width: 12px; background-color: #bbb; border-radius: 50%; display: inline-block; margin: 0 5px; border: 1px solid #000; }
         .dot-correct { background-color: #2d5a27; }
@@ -79,24 +82,20 @@
 <body>
 
     <div class="game-card" id="main-card">
-        <h1>
-            <span class="title-main">WANTED</span>
-            <span class="title-sub">DEAD OR ALIVE</span>
-        </h1>
+        <h1><span class="title-main">WANTED</span><span class="title-sub">DEAD OR ALIVE</span></h1>
 
         <div id="start-screen" class="screen active">
             <div id="welcome-msg">
                 <div id="start-streak-display" class="streak-badge" style="display:none;">Serie: 0 Tage 🔥</div>
-                
                 <div class="tutorial-box">
                     <h3>DAILY OP QUIZ</h3>
                     <p class="flavor-text">
                         "Reichtum, Macht und Ruhm... der Mann, der alles besaß, war der Piratenkönig Gol D. Roger!" <br><br>
-                        Die Ära der Piraten hat begonnen! Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur die Weisesten werden den Thron besteigen!
+                        Beantworte die Fragen der Grandline, um dein Kopfgeld zu steigern. Nur die Weisesten werden den Thron besteigen!
                     </p>
                     
                     <strong>Deine Werkzeuge:</strong>
-                    <ul style="margin: 5px 0 10px 15px; padding: 0;">
+                    <ul style="margin: 5px 0 15px 15px; padding: 0;">
                         <li>🃏 <b>50/50:</b> Eliminiert zwei Lügen der Marine.</li>
                         <li>📜 <b>ROBIN:</b> Nico Robin flüstert dir einen Tipp zu.</li>
                     </ul>
@@ -127,6 +126,7 @@
                 <button id="j-robin" class="btn" style="width: 45%; font-size: 0.8rem; padding: 8px;" onclick="useRobin()">📜 ROBIN</button>
             </div>
             
+            <div id="category-badge">KATEGORIE</div>
             <div id="progress-dots" style="margin-bottom: 10px;"></div>
             <div id="question-image-container"><img id="question-image" src="" alt="Quest"></div>
             <div id="score-display">0 ฿</div>
@@ -134,6 +134,11 @@
             
             <h2 id="question-text" style="font-family: 'Permanent Marker'; min-height: 60px; font-size: 1.4rem;">-</h2>
             <div id="answer-buttons"></div>
+            
+            <div id="source-container" style="display:none; margin-top: 10px;">
+                <a id="source-link" href="#" target="_blank">📖 Mehr dazu im OPWiki</a>
+            </div>
+
             <button id="next-btn" class="btn" style="display:none; background: var(--deep-red); color: white;" onclick="loadQuestion()">WEITER ➔</button>
         </div>
 
@@ -149,7 +154,6 @@
     <script src="questions.js"></script>
 
     <script>
-        // SOUNDS INITIALISIEREN
         const soundCorrect = new Audio('correct.mp3');
         const soundWrong = new Audio('wrong.mp3');
         const soundCoins = new Audio('coins.mp3');
@@ -166,9 +170,7 @@
             const lastPlayedDate = localStorage.getItem("OP_LastPlayedDate");
             const lastScore = localStorage.getItem("OP_LastScore");
             const streak = parseInt(localStorage.getItem("OP_Streak")) || 0;
-
             updateStreakDisplay(streak);
-
             if (lastPlayedDate === today) {
                 document.getElementById('welcome-msg').style.display = 'none';
                 document.getElementById('lock-msg').style.display = 'block';
@@ -194,16 +196,28 @@
                 const h = Math.floor(diff / (1000 * 60 * 60));
                 const m = Math.floor((diff / (1000 * 60)) % 60);
                 const s = Math.floor((diff / 1000) % 60);
-                document.getElementById('timer-box').innerText = 
-                    (h < 10 ? "0"+h : h) + ":" + (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+                document.getElementById('timer-box').innerText = (h < 10 ? "0"+h : h) + ":" + (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
             }, 1000);
         }
 
         function startGame() {
-            if (typeof alleFragen === 'undefined') { alert("Fehler: questions.js nicht gefunden!"); return; }
+            if (typeof alleFragen === 'undefined') { alert("Fehler: questions.js fehlt!"); return; }
+            const easyPool = alleFragen.filter(f => f.difficulty === 0);
+            const mediumPool = alleFragen.filter(f => f.difficulty === 1);
+            const hardPool = alleFragen.filter(f => f.difficulty === 2);
             let seed = new Date().getDate() + new Date().getMonth() + new Date().getFullYear();
-            heutigeFragen = [...alleFragen].sort(() => Math.sin(seed++)).slice(0, 5);
-            
+            const shuffle = (array, s) => {
+                let m = array.length, t, i;
+                while (m) {
+                    i = Math.floor(Math.abs(Math.sin(s++)) * m--);
+                    t = array[m]; array[m] = array[i]; array[i] = t;
+                }
+                return array;
+            };
+            const pickedEasy = shuffle([...easyPool], seed).slice(0, 2);
+            const pickedMedium = shuffle([...mediumPool], seed + 10).slice(0, 2);
+            const pickedHard = shuffle([...hardPool], seed + 20).slice(0, 1);
+            heutigeFragen = [...pickedEasy, ...pickedMedium, ...pickedHard];
             const dotsContainer = document.getElementById('progress-dots');
             dotsContainer.innerHTML = "";
             for (let i = 0; i < heutigeFragen.length; i++) {
@@ -218,15 +232,15 @@
         function loadQuestion() {
             if (currentIdx >= heutigeFragen.length) { finishGame(); return; }
             const q = heutigeFragen[currentIdx];
-            const imgContainer = document.getElementById('question-image-container');
-            const imgElement = document.getElementById('question-image');
-            
-            if (q.img) { imgElement.src = q.img; imgContainer.style.display = "flex"; } 
-            else { imgContainer.style.display = "none"; }
-
-            document.getElementById('question-text').innerText = q.q;
+            document.getElementById('category-badge').innerText = q.category || "Grandline";
+            document.getElementById('source-container').style.display = "none";
             document.getElementById('next-btn').style.display = "none";
             document.getElementById('robin-hint').style.display = "none";
+            const imgContainer = document.getElementById('question-image-container');
+            const imgElement = document.getElementById('question-image');
+            if (q.img) { imgElement.src = q.img; imgContainer.style.display = "flex"; } 
+            else { imgContainer.style.display = "none"; }
+            document.getElementById('question-text').innerText = q.q;
             const container = document.getElementById('answer-buttons');
             container.innerHTML = "";
             q.options.forEach((opt, i) => {
@@ -244,6 +258,10 @@
             const allBtns = document.querySelectorAll('#answer-buttons .btn');
             const currentDot = document.getElementById('dot-' + currentIdx);
             allBtns.forEach(b => b.disabled = true);
+            if(q.url) {
+                document.getElementById('source-link').href = q.url;
+                document.getElementById('source-container').style.display = "block";
+            }
             if (choice === q.correct) {
                 soundCorrect.play().catch(()=>{}); 
                 btn.classList.add('correct');
@@ -280,30 +298,22 @@
             const todayStr = today.toDateString();
             const lastPlayedDateStr = localStorage.getItem("OP_LastPlayedDate");
             let streak = parseInt(localStorage.getItem("OP_Streak")) || 0;
-
             if (lastPlayedDateStr) {
                 const lastDate = new Date(lastPlayedDateStr);
                 const diffTime = Math.abs(today - lastDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if (diffDays === 1) streak++; 
-                else if (diffDays > 1) streak = 1;
-            } else {
-                streak = 1;
-            }
-
+                if (diffDays === 1) streak++; else if (diffDays > 1) streak = 1;
+            } else { streak = 1; }
             localStorage.setItem("OP_LastPlayedDate", todayStr);
             localStorage.setItem("OP_LastScore", score.toLocaleString() + " ฿");
             localStorage.setItem("OP_Streak", streak);
             updateStreakDisplay(streak);
-
             showScreen('end-screen');
             document.getElementById('final-score').innerText = score.toLocaleString() + " ฿";
             const rankDiv = document.getElementById('rank-display');
             const card = document.getElementById('main-card');
-
             if(score >= 3000000000) { 
-                rankDiv.innerText = "👑 PIRATENKÖNIG"; 
-                rankDiv.style.color = "var(--gold)";
+                rankDiv.innerText = "👑 PIRATENKÖNIG"; rankDiv.style.color = "var(--gold)";
                 card.classList.add('quake-active'); 
                 const duration = 3000; const end = Date.now() + duration;
                 (function frame() {
