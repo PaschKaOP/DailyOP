@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WANTED: Das Daily OP Quiz</title>
+<meta property="og:title" content="WANTED: Das Daily One Piece Quiz">
+<meta property="og:description" content="Steigere dein Kopfgeld! Jeden Tag 5 neue Fragen der Grandline. Wirst du der nächste Piratenkönig?">
+<meta property="og:image" content="https://images.alphacoders.com/132/1328221.png"> <meta property="og:url" content="https://paschkaop.github.io/DailyOP/">
+<meta name="twitter:card" content="summary_large_image">
     
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Permanent+Marker&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -14,12 +18,18 @@
             --deep-red: #8b0000; --haki: #4b0082;
         }
 
-        body { 
+         body { 
             font-family: 'Roboto Condensed', sans-serif;
             background-color: #1a0f00;
             background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; overflow-x: hidden;
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh; 
+            margin: 0; 
+            overflow-x: hidden;
+            padding: 20px 0;
         }
 
         .game-card { 
@@ -356,5 +366,10 @@
             document.getElementById(id).classList.add('active');
         }
     </script>
+    
+<footer style="margin-top: 40px; padding: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.4); text-align: center; font-family: sans-serif; width: 100%;">
+        <p>Dies ist ein nicht-kommerzielles Fan-Projekt. <br> 
+        One Piece ist Eigentum von Eiichiro Oda und Shueisha.</p>
+</footer>
 </body>
 </html>
